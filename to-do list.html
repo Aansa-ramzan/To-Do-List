@@ -1,0 +1,343 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #d8d7d7;
+            color: #060606; 
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin-top: 50px;
+            width: 100%;
+        }
+
+        h1 {
+            text-align: center;
+            color: #353535; 
+            margin-bottom: 20px;
+        }
+
+        #input-tag, #due-date {
+            padding: 12px;
+            width: 320px;
+            font-size: 16px;
+            border: 2px solid #dad6d6;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            background-color: #9f9c9c; 
+            color:#444;
+        }
+
+        #input-tag:focus, #due-date:focus {
+            border-color: #5cdb95; 
+            outline: none;
+        }
+
+        #button, #clear-button {
+            padding: 12px 18px;
+            font-size: 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        #button {
+            background-color: #5cdb95;
+            color: #ffffff;
+        }
+
+        #button:hover {
+            background-color: #45b378;
+        }
+
+        #clear-button {
+            background-color: #e74c3c; 
+            color: white;
+        }
+
+        #clear-button:hover {
+            background-color: #c0392b;
+        }
+
+        #status {
+            font-size: 16px;
+            font-weight: bold;
+            color: #060505;
+            margin-top: 20px;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+            width: auto;
+            margin-left: 50px;
+            margin-right: 50px;
+        }
+
+        li {
+            background-color: #7d7c7c; 
+            padding: 12px;
+            margin: 8px 0;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+            transition: all 0.3s ease;
+        }
+
+        li.completed {
+            background-color: ##7d7c7c; 
+            text-decoration: line-through;
+        }
+
+        li.important {
+            background-color: #f39c12; 
+        }
+
+        li:hover {
+            background-color: #7d7c7c; 
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15); 
+        }
+
+        .task-text {
+            flex-grow: 1;
+            word-wrap: break-word;
+            margin-right: 15px;
+        }
+
+        .due-date {
+            font-size: 14px;
+            color: #bbb; 
+        }
+
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+            margin-left: 8px;
+        }
+
+        .delete-btn {
+            background-color: #e74c3c; 
+        }
+
+        .edit-btn {
+            background-color: #2dae92; 
+        }
+
+        .edit-btn:hover {
+            background-color: #1b7c5f;
+        }
+
+        .delete-btn:hover {
+            background-color: #c0392b;
+        }
+
+        .complete-btn {
+            background-color: #5bc0de;
+        }
+
+        .complete-btn:hover {
+            background-color: #31b0d5;
+        }
+
+        .important-btn {
+            background-color: #f39c12; 
+        }
+
+        .important-btn:hover {
+            background-color: #e67e22;
+        }
+
+    
+        #sort-select {
+            margin-top: 15px;
+            font-size: 16px;
+            padding: 10px;
+            border-radius: 6px;
+            border: 2px solid #444;
+            background-color: #f0eeee;
+            color: #353434;
+        }
+
+    
+        @media (max-width: 500px) {
+            #input-tag, #button, #clear-button, ul {
+                width: 100%;
+                max-width: 400px;
+                margin: 0;
+            }
+
+            button {
+                padding: 6px 10px;
+                font-size: 14px;
+            }
+
+            li {
+                font-size: 14px;
+            }
+        }
+
+    </style> 
+    
+</head>
+<body>
+    <div class="container">
+        <h1>To-Do List</h1>
+        <input type="text" id="input-tag" placeholder="Enter new task..">
+        <input type="date" id="due-date" placeholder="Due date">
+        <button id="button" onclick="addTask()">Add Task</button>
+        <button id="clear-button" onclick="clearAllTasks()">Clear All</button>
+        <div id="status">Completed: 0 | Pending: 0</div>
+        
+        <select id="sort-select" onchange="sortTasks()">
+            <option value="none">Sort by...</option>
+            <option value="due-date">Sort by Due Date</option>
+            <option value="task-name">Sort by Task Name</option>
+        </select>
+    </div>
+    <ul id="output-tag"></ul>
+    <script>
+        function addTask() {
+            const taskInput = document.getElementById('input-tag');
+            const dueDateInput = document.getElementById('due-date');
+            const taskText = taskInput.value.trim();
+            const dueDate = dueDateInput.value.trim();
+
+            if (taskText !== '') {
+                if (isDuplicate(taskText)) {
+                    alert('This task already exists!');
+                    return;
+                }
+
+                const taskList = document.getElementById('output-tag');
+                const newTask = document.createElement('li');
+                
+                const formattedDate = dueDate ? new Date(dueDate).toLocaleDateString() : 'No due date';
+
+                newTask.innerHTML = `
+                    <span class="task-text">${taskText}</span>
+                    <span class="due-date">Due: ${formattedDate}</span>
+                    <button class="delete-btn" onclick="deleteTask(this)">Delete</button>
+                    <button class="edit-btn" onclick="editTask(this)">Edit</button>
+                    <button class="complete-btn" onclick="markCompleted(this)">Complete</button>
+                    <button class="important-btn" onclick="toggleImportant(this)">Important</button>
+                `;
+
+                taskList.appendChild(newTask);
+                taskInput.value = ''; 
+                dueDateInput.value = ''; 
+                updateStatus(); 
+            }
+        }
+
+        function deleteTask(button) {
+            const taskItem = button.parentElement;
+            taskItem.remove();
+            updateStatus(); 
+        }
+
+        function editTask(button) {
+            const taskItem = button.parentElement;
+            const taskText = taskItem.querySelector('.task-text').textContent.trim();
+            const newText = prompt("Edit your task:", taskText);
+            if (newText && newText !== taskText) {
+                taskItem.querySelector('.task-text').textContent = newText;
+                updateStatus();
+            }
+        }
+
+        function toggleImportant(button) {
+            const taskItem = button.parentElement;
+            taskItem.classList.toggle('important'); 
+            updateStatus();
+        }
+
+        function markCompleted(button) {
+            const taskItem = button.parentElement;
+            taskItem.classList.add('completed'); 
+            updateStatus(); 
+        }
+
+        function clearAllTasks() {
+            const taskList = document.getElementById('output-tag');
+            taskList.innerHTML = ''; 
+            updateStatus(); 
+        }
+
+        function updateStatus() {
+            const taskList = document.getElementById('output-tag');
+            let completedTasks = 0;
+            let pendingTasks = 0;
+
+            for (let i = 0; i < taskList.children.length; i++) {
+                const taskItem = taskList.children[i];
+                if (taskItem.classList.contains('completed')) {
+                    completedTasks++;
+                } else {
+                    pendingTasks++;
+                }
+            }
+
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerText = `Completed: ${completedTasks} | Pending: ${pendingTasks}`;
+        }
+
+        function isDuplicate(taskText) {
+            const taskList = document.getElementById('output-tag');
+            for (let i = 0; i < taskList.children.length; i++) {
+                const taskItem = taskList.children[i];
+                if (taskItem.querySelector('.task-text').textContent.trim() === taskText) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function sortTasks() {
+            const sortBy = document.getElementById('sort-select').value;
+            const taskList = document.getElementById('output-tag');
+            const tasks = Array.from(taskList.children);
+
+            if (sortBy === 'due-date') {
+                tasks.sort((a, b) => {
+                    const dueDateA = a.querySelector('.due-date').textContent.trim();
+                    const dueDateB = b.querySelector('.due-date').textContent.trim();
+
+                    if (dueDateA === 'No due date') return 1;
+                    if (dueDateB === 'No due date') return -1;
+
+                    return new Date(dueDateA) - new Date(dueDateB);
+                });
+            } else if (sortBy === 'task-name') {
+                tasks.sort((a, b) => {
+                    const taskNameA = a.querySelector('.task-text').textContent.trim().toLowerCase();
+                    const taskNameB = b.querySelector('.task-text').textContent.trim().toLowerCase();
+                    return taskNameA.localeCompare(taskNameB);
+                });
+            }
+
+            taskList.innerHTML = '';
+            tasks.forEach(task => taskList.appendChild(task));
+        }
+    </script>
+</body>
+</html>
